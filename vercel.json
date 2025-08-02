@@ -1,6 +1,3 @@
 {
-  "version": 2,
-  "env": {
-    "NEXT_PUBLIC_API_URL": "https://ention-backend-production.up.railway.app"
-  }
+  "version": 2
 } 
