@@ -25,11 +25,13 @@ const Login = () => {
     const passwordInputRef = React.useRef(null);
     const [isPasswordFocused, setIsPasswordFocused] = useState(false);
 
-    if(status === 'loading' || status === 'unauthenticated'){
-         
-    }else{
-        router.push(searchParams.get('redirect') || '/')
-    }
+    // Check if user is already logged in
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            router.push(searchParams.get('redirect') || '/');
+        }
+    }, [router, searchParams]);
 
     const validate = (values) => {
         const errs = {};

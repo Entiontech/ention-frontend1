@@ -26,11 +26,13 @@ const Signup = () => {
     const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
 
-    if(status === 'loading' || status === 'unauthenticated'){
-         
-    }else{
-        router.push(searchParams.get('redirect') || '/')
-    }
+    // Check if user is already logged in
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            router.push(searchParams.get('redirect') || '/');
+        }
+    }, [router, searchParams]);
 
     const handleSubmit = async (e) => {
         e.preventDefault()
