@@ -1,7 +1,6 @@
 import "styles/globals.css";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { SessionProvider } from "next-auth/react";
 import ChatBot from "react-simple-chatbot";
 import { ThemeProvider } from "styled-components";
 import Head from "next/head";
@@ -26,7 +25,7 @@ if (typeof window !== 'undefined' && window.MutationObserver) {
 
 export default function App({
   Component,
-  pageProps: { session, ...pageProps },
+  pageProps,
 }) {
   const steps = [
     {
@@ -116,20 +115,18 @@ export default function App({
       </Head>
       <div className="App">
         <ToastContainer />
-        <SessionProvider>
-          <Header />
-          <Component {...pageProps} />
-          <Footer />
-          <ThemeProvider theme={theme}>
-            <ChatBot
-              // This appears as the header
-              // text for the chat bot
-              headerTitle="Ention"
-              steps={steps}
-              {...config}
-            />
-          </ThemeProvider>
-        </SessionProvider>
+        <Header />
+        <Component {...pageProps} />
+        <Footer />
+        <ThemeProvider theme={theme}>
+          <ChatBot
+            // This appears as the header
+            // text for the chat bot
+            headerTitle="Ention"
+            steps={steps}
+            {...config}
+          />
+        </ThemeProvider>
       </div>
     </>
   );

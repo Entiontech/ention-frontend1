@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react'
 import Navbar from '../components/layout/header.js';
-import { signIn, useSession, getSession } from "next-auth/react";
+import { useState, useEffect } from "react";
 import styles from 'styles/Products.module.css'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -17,7 +17,7 @@ import { signup } from '../utils/auth';
 
 const Signup = () => {
 
-    const {session, status} = useSession()
+    const [isLoggedIn, setIsLoggedIn] = useState(false)
     const router = useRouter()
     const searchParams = useSearchParams()
     const [passVisible, togglePass] = useState(false) 

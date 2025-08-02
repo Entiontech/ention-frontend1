@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 
-import { signIn, useSession, } from "next-auth/react";
+import { useState, useEffect } from "react";
 // import styles from 'styles/Products.module.css'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -16,7 +16,7 @@ import { login } from '../utils/auth';
 
 const Login = () => {
 
-    const {session, status} = useSession()
+    const [isLoggedIn, setIsLoggedIn] = useState(false)
     const router = useRouter()
     const searchParams = useSearchParams()
     const [passVisible, togglePass] = useState(false) 
