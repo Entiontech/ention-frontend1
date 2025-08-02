@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react'
-
-import { useState, useEffect } from "react";
 // import styles from 'styles/Products.module.css'
 import Image from 'next/image'
 import Link from 'next/link'

@@ -1,6 +1,5 @@
-import React, { useRef, useState } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 import Navbar from '../components/layout/header.js';
-import { useState, useEffect } from "react";
 import styles from 'styles/Products.module.css'
 import Image from 'next/image'
 import Link from 'next/link'
