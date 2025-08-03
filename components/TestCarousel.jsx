@@ -10,6 +10,8 @@ export default function TestCarousel() {
   const [middleSlide, setMiddleSlide] = useState(null);
   const totalSlides = useRef(10);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [loadedImages, setLoadedImages] = useState(new Set());
+  
   const imagesArray = [
     "/assets/all_product_page/all product carousal 6.webp",
     "/assets/all_product_page/all product carousal photo1.webp",
@@ -20,9 +22,30 @@ export default function TestCarousel() {
     "/assets/all_product_page/all product carousal photo6.webp",
     "/assets/all_product_page/Copy of copy uncut (22).webp",
   ];
+
+  // Preload first 3 images immediately
+  useEffect(() => {
+    const preloadImages = async () => {
+      const imagesToPreload = imagesArray.slice(0, 3);
+      const promises = imagesToPreload.map((src) => {
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.onload = () => {
+            setLoadedImages(prev => new Set([...prev, src]));
+            resolve();
+          };
+          img.src = src;
+        });
+      });
+      await Promise.all(promises);
+    };
+    preloadImages();
+  }, []);
+
   useEffect(() => {
     console.log("middleSlide", middleSlide);
   }, [middleSlide]);
+
   const getStyle = useCallback(
     (index) => {
       const previndex =
@@ -59,6 +82,7 @@ export default function TestCarousel() {
       swiperRef.current.slideTo(index); // Change active slide
     }
   };
+
   return (
     <div className="w-full">
       <Swiper
@@ -75,6 +99,8 @@ export default function TestCarousel() {
       >
         {imagesArray.map((image, index) => {
           const isActive = middleSlide === index;
+          const isLoaded = loadedImages.has(image);
+          
           return (
             <SwiperSlide key={index}>
               <div
@@ -95,7 +121,24 @@ export default function TestCarousel() {
                 }}
                 className="text-2xl font-bold"
               >
-                <Image src={image} alt="laptop image" width={1200} height={600} style={{ width: '100%', height: '100%', objectFit: 'cover', background: 'transparent' }} loading="lazy" />
+                <Image 
+                  src={image} 
+                  alt="laptop image" 
+                  width={800} 
+                  height={400} 
+                  style={{ 
+                    width: '100%', 
+                    height: '100%', 
+                    objectFit: 'cover', 
+                    background: 'transparent',
+                    opacity: isLoaded ? 1 : 0.7,
+                    transition: 'opacity 0.3s ease-in-out'
+                  }} 
+                  loading={index < 3 ? "eager" : "lazy"}
+                  priority={index < 3}
+                  placeholder="blur"
+                  blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
+                />
               </div>
             </SwiperSlide>
           );
@@ -118,7 +161,8 @@ export default function TestCarousel() {
               }`}
               width={64}
               height={64}
-              loading="lazy"
+              loading={index < 3 ? "eager" : "lazy"}
+              priority={index < 3}
             />
           </div>
         ))}

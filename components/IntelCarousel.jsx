@@ -6,6 +6,7 @@ export default function IntelCarousel() {
   const [selectedSlide, setSelectedSlide] = useState(0);
   const [parallax, setParallax] = useState({}); // {0: {x, y}, 1: {x, y}, 2: {x, y}}
   const [isMobile, setIsMobile] = useState(false);
+  const [loadedImages, setLoadedImages] = useState(new Set());
   const slideRefs = [useRef(), useRef(), useRef()];
   const slideTextVariants = {
     hidden: { opacity: 0 },
@@ -19,6 +20,24 @@ export default function IntelCarousel() {
     "/assets/landing_page/3A.webp",
     "/assets/landing_page/4A.webp",
   ];
+
+  // Preload images for faster loading
+  useEffect(() => {
+    const preloadImages = async () => {
+      const promises = slides.map((src) => {
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.onload = () => {
+            setLoadedImages(prev => new Set([...prev, src]));
+            resolve();
+          };
+          img.src = src;
+        });
+      });
+      await Promise.all(promises);
+    };
+    preloadImages();
+  }, []);
 
   // Debug log
   useEffect(() => {
@@ -113,52 +132,56 @@ export default function IntelCarousel() {
       className={isMobile ? "" : "w-full"}
     >
       {slides && slides.length > 0 ? (
-        slides.map((slide, idx) => (
-          <div
-            key={idx}
-            ref={slideRefs[idx]}
-            onClick={() => !isMobile && setSelectedSlide(selectedSlide === idx ? null : idx)}
-            onMouseMove={(e) => !isMobile && handleMouseMove(e, idx)}
-            onMouseLeave={() => !isMobile && handleMouseLeave(idx)}
-            style={{
-              ...(isMobile ? {
-                width: "100vw",
-                height: "100vh",
-                display: selectedSlide === idx ? "block" : "none",
-                position: "relative",
-                cursor: "default"
-              } : getSlideUniqueStyle(idx)),
-              cursor: isMobile ? "default" : "pointer",
-            }}
-            className={`front-page-slider relative ${isMobile ? "mobile-slide" : ""}`}
-          >
+        slides.map((slide, idx) => {
+          const isLoaded = loadedImages.has(slide);
+          return (
             <div
-              className="background-image-center front-slide-hover"
+              key={idx}
+              ref={slideRefs[idx]}
+              onClick={() => !isMobile && setSelectedSlide(selectedSlide === idx ? null : idx)}
+              onMouseMove={(e) => !isMobile && handleMouseMove(e, idx)}
+              onMouseLeave={() => !isMobile && handleMouseLeave(idx)}
               style={{
-                height: isMobile ? "100vh" : (
-                  selectedSlide === idx
-                    ? "40rem"
-                    : idx === 1
-                    ? "clamp(20rem,70vh,35rem)"
-                    : "clamp(20rem,70vh,40rem)"
-                ),
-                width: isMobile ? "100vw" : "auto",
-                backgroundImage: `url(${slide})`,
-                backgroundSize: isMobile ? "cover" : "cover",
-                backgroundPosition: isMobile ? "center" : "center",
-                transition: "transform 0.2s cubic-bezier(.23,1.01,.32,1)",
-                transform: isMobile ? "none" : (parallax[idx]
-                  ? `translate3d(${parallax[idx].x || 0}px, ${parallax[idx].y || 0}px, 0)`
-                  : "none"),
+                ...(isMobile ? {
+                  width: "100vw",
+                  height: "100vh",
+                  display: selectedSlide === idx ? "block" : "none",
+                  position: "relative",
+                  cursor: "default"
+                } : getSlideUniqueStyle(idx)),
+                cursor: isMobile ? "default" : "pointer",
               }}
+              className={`front-page-slider relative ${isMobile ? "mobile-slide" : ""}`}
             >
-             
+              <div
+                className="background-image-center front-slide-hover"
+                style={{
+                  height: isMobile ? "100vh" : (
+                    selectedSlide === idx
+                      ? "40rem"
+                      : idx === 1
+                      ? "clamp(20rem,70vh,35rem)"
+                      : "clamp(20rem,70vh,40rem)"
+                  ),
+                  width: isMobile ? "100vw" : "auto",
+                  backgroundImage: `url(${slide})`,
+                  backgroundSize: isMobile ? "cover" : "cover",
+                  backgroundPosition: isMobile ? "center" : "center",
+                  transition: "transform 0.2s cubic-bezier(.23,1.01,.32,1)",
+                  transform: isMobile ? "none" : (parallax[idx]
+                    ? `translate3d(${parallax[idx].x || 0}px, ${parallax[idx].y || 0}px, 0)`
+                    : "none"),
+                  opacity: isLoaded ? 1 : 0.8,
+                }}
+              >
+               
+              </div>
+              {!isMobile && selectedSlide !== idx && (
+                <div className="absolute w-full h-full top-0 left-0 slide-dark-cover"></div>
+              )}
             </div>
-            {!isMobile && selectedSlide !== idx && (
-              <div className="absolute w-full h-full top-0 left-0 slide-dark-cover"></div>
-            )}
-          </div>
-        ))
+          );
+        })
       ) : (
         <div style={{ 
           width: "100%", 
