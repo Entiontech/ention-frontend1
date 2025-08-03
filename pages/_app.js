@@ -170,7 +170,6 @@ export default function App({
         
         {/* Performance hints */}
         <link rel="preload" href="/_next/static/chunks/main.js" as="script" />
-        <link rel="preload" href="/_next/static/chunks/webpack.js" as="script" />
       </Head>
       
       <div className="App">

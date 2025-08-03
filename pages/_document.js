@@ -11,7 +11,6 @@ export default function Document() {
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"></link>
         
         {/* Preload critical resources */}
-        <link rel="preload" href="/_next/static/css/app.css" as="style" />
         <link rel="preload" href="/_next/static/chunks/main.js" as="script" />
         
         {/* DNS prefetch for external resources */}
