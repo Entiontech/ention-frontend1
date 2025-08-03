@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { FaEdit, FaSave, FaTimes, FaPlus, FaTrash, FaLaptop, FaRupeeSign, FaCog, FaChartLine, FaUsers, FaShoppingCart, FaStar, FaArrowUp, FaArrowDown } from 'react-icons/fa';
+import { useRouter } from 'next/router';
+import { FaEdit, FaSave, FaTimes, FaPlus, FaTrash, FaLaptop, FaRupeeSign, FaCog, FaChartLine, FaUsers, FaShoppingCart, FaStar, FaArrowUp, FaArrowDown, FaSignOutAlt } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://ention-backend.onrender.com';
 
 export default function AdminPanel() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingProduct, setEditingProduct] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [adminEmail, setAdminEmail] = useState('');
+  const router = useRouter();
   const [newProduct, setNewProduct] = useState({
     model: '',
     name: '',
@@ -32,15 +35,37 @@ export default function AdminPanel() {
     aovGrowth: 5.2
   });
 
-  // Fetch products on component mount
+  // Check authentication and fetch products on component mount
   useEffect(() => {
+    const adminToken = localStorage.getItem('adminToken');
+    const email = localStorage.getItem('adminEmail');
+    
+    if (!adminToken) {
+      router.push('/admin/login');
+      return;
+    }
+    
+    setAdminEmail(email);
     fetchProducts();
-  }, []);
+  }, [router]);
 
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/api/admin/products`);
+      const adminToken = localStorage.getItem('adminToken');
+      const response = await fetch(`${API_BASE_URL}/api/admin/products`, {
+        headers: {
+          'Authorization': `Bearer ${adminToken}`
+        }
+      });
+      
+      if (response.status === 401) {
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminEmail');
+        router.push('/admin/login');
+        return;
+      }
+      
       if (response.ok) {
         const data = await response.json();
         setProducts(data);
@@ -57,10 +82,22 @@ export default function AdminPanel() {
 
   const initializeProducts = async () => {
     try {
+      const adminToken = localStorage.getItem('adminToken');
       const response = await fetch(`${API_BASE_URL}/api/admin/products/initialize`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminToken}`
+        }
       });
+      
+      if (response.status === 401) {
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminEmail');
+        router.push('/admin/login');
+        return;
+      }
+      
       if (response.ok) {
         const data = await response.json();
         toast.success('Products initialized successfully!');
@@ -80,11 +117,22 @@ export default function AdminPanel() {
 
   const handleSave = async () => {
     try {
+      const adminToken = localStorage.getItem('adminToken');
       const response = await fetch(`${API_BASE_URL}/api/admin/products/${editingProduct.model}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminToken}`
+        },
         body: JSON.stringify(editingProduct)
       });
+      
+      if (response.status === 401) {
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminEmail');
+        router.push('/admin/login');
+        return;
+      }
       
       if (response.ok) {
         toast.success('Product updated successfully!');
@@ -105,11 +153,22 @@ export default function AdminPanel() {
 
   const handleAddProduct = async () => {
     try {
+      const adminToken = localStorage.getItem('adminToken');
       const response = await fetch(`${API_BASE_URL}/api/admin/products`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminToken}`
+        },
         body: JSON.stringify(newProduct)
       });
+      
+      if (response.status === 401) {
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminEmail');
+        router.push('/admin/login');
+        return;
+      }
       
       if (response.ok) {
         toast.success('Product added successfully!');
@@ -139,9 +198,20 @@ export default function AdminPanel() {
     if (!confirm('Are you sure you want to delete this product?')) return;
     
     try {
+      const adminToken = localStorage.getItem('adminToken');
       const response = await fetch(`${API_BASE_URL}/api/admin/products/${model}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${adminToken}`
+        }
       });
+      
+      if (response.status === 401) {
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminEmail');
+        router.push('/admin/login');
+        return;
+      }
       
       if (response.ok) {
         toast.success('Product deleted successfully!');
@@ -153,6 +223,13 @@ export default function AdminPanel() {
       console.error('Error deleting product:', error);
       toast.error('Error deleting product');
     }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminEmail');
+    toast.success('Logged out successfully');
+    router.push('/admin/login');
   };
 
   if (loading) {
@@ -181,7 +258,11 @@ export default function AdminPanel() {
                 <p className="text-sm text-gray-600 mt-1">Product Management & Analytics</p>
               </div>
             </div>
-            <div className="flex space-x-4">
+            <div className="flex items-center space-x-4">
+              <div className="text-right">
+                <p className="text-sm text-gray-600">Logged in as</p>
+                <p className="text-sm font-medium text-gray-900">{adminEmail}</p>
+              </div>
               <button
                 onClick={initializeProducts}
                 className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 py-3 rounded-xl flex items-center shadow-lg transition-all duration-200 transform hover:scale-105"
@@ -195,6 +276,13 @@ export default function AdminPanel() {
               >
                 <FaPlus className="mr-2" />
                 Add Product
+              </button>
+              <button
+                onClick={handleLogout}
+                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-3 rounded-xl flex items-center shadow-lg transition-all duration-200 transform hover:scale-105"
+              >
+                <FaSignOutAlt className="mr-2" />
+                Logout
               </button>
             </div>
           </div>
