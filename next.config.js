@@ -26,7 +26,6 @@ const nextConfig = {
   // Enhanced performance optimizations
   experimental: {
     optimizePackageImports: ['react-icons', 'framer-motion', 'swiper'],
-    optimizeCss: true, // Enable CSS optimization
     scrollRestoration: true, // Better scroll performance
     legacyBrowsers: false, // Disable legacy browser support for better performance
   },
@@ -162,12 +161,6 @@ const nextConfig = {
       {
         source: '/assets/:path*',
         destination: '/assets/:path*',
-        headers: [
-          {
-            key: 'Link',
-            value: '</assets/landing_page/2A.webp>; rel=preload; as=image, </assets/landing_page/3A.webp>; rel=preload; as=image, </assets/landing_page/4A.webp>; rel=preload; as=image',
-          },
-        ],
       },
     ];
   },
