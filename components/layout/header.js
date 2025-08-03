@@ -206,7 +206,7 @@ const Header = () => {
                 },
               }}
             >
-              <button className="w-24 h-8 bg-transparent border rounded-3xl border-white flex center text-white text-sm hover:scale-105  transition-all duration-300 ease-in-out">
+              <button className="w-24 h-8 bg-transparent border rounded-3xl border-white flex center text-white text-sm hover:bg-white hover:text-black hover:scale-105 transition-all duration-300 ease-in-out shadow-sm border-opacity-100" style={{borderWidth: '1px', borderStyle: 'solid', borderColor: 'white'}}>
                 Login
               </button>
             </Link>

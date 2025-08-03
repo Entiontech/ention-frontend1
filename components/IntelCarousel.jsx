@@ -1,49 +1,96 @@
-import React, { useCallback, useState, useRef, useEffect } from "react";
+import React, { useCallback, useState, useRef, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/router";
+import NextImage from "next/image";
 
 export default function IntelCarousel() {
   const [selectedSlide, setSelectedSlide] = useState(0);
-  const [parallax, setParallax] = useState({}); // {0: {x, y}, 1: {x, y}, 2: {x, y}}
+  const [parallax, setParallax] = useState({});
   const [isMobile, setIsMobile] = useState(false);
   const [loadedImages, setLoadedImages] = useState(new Set());
+  const [isInitialized, setIsInitialized] = useState(false);
   const slideRefs = [useRef(), useRef(), useRef()];
-  const slideTextVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { duration: 0.4, delay: 0.3 } },
-  };
   const router = useRouter();
 
-  // Use direct string paths instead of Next.js imports
-  const slides = [
+  // Memoized slides data
+  const slides = useMemo(() => [
     "/assets/landing_page/2A.webp",
     "/assets/landing_page/3A.webp",
     "/assets/landing_page/4A.webp",
-  ];
+  ], []);
 
-  // Preload images for faster loading
+  // Optimized slide text variants
+  const slideTextVariants = useMemo(() => ({
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 0.3, delay: 0.2 } },
+  }), []);
+
+  // Aggressive preloading with priority loading
   useEffect(() => {
     const preloadImages = async () => {
-      const promises = slides.map((src) => {
+      const promises = slides.map((src, index) => {
         return new Promise((resolve) => {
           const img = new Image();
           img.onload = () => {
             setLoadedImages(prev => new Set([...prev, src]));
             resolve();
           };
+          img.onerror = resolve; // Don't block on error
           img.src = src;
+          
+          // Prioritize first image
+          if (index === 0) {
+            img.fetchPriority = 'high';
+          }
         });
       });
-      await Promise.all(promises);
+
+      // Wait for first image to load, then initialize
+      await promises[0];
+      setIsInitialized(true);
+      
+      // Load remaining images in background
+      Promise.all(promises.slice(1));
     };
+
     preloadImages();
-  }, []);
+  }, [slides]);
 
-  // Debug log
+  // Optimized mobile detection
   useEffect(() => {
-    console.log("IntelCarousel mounted, slides:", slides.length);
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+    };
+    
+    checkMobile();
+    
+    // Debounced resize handler
+    let timeoutId;
+    const debouncedResize = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(checkMobile, 100);
+    };
+    
+    window.addEventListener('resize', debouncedResize);
+    return () => {
+      window.removeEventListener('resize', debouncedResize);
+      clearTimeout(timeoutId);
+    };
   }, []);
 
+  // Optimized auto-scroll for mobile
+  useEffect(() => {
+    if (!isMobile || !isInitialized) return;
+    
+    const interval = setInterval(() => {
+      setSelectedSlide((prev) => (prev + 1) % slides.length);
+    }, 3000);
+    
+    return () => clearInterval(interval);
+  }, [isMobile, isInitialized, slides.length]);
+
+  // Optimized slide style calculation
   const getSlideUniqueStyle = useCallback(
     (slideIndex) => {
       switch (slideIndex) {
@@ -70,42 +117,35 @@ export default function IntelCarousel() {
     [selectedSlide]
   );
 
-  // Parallax effect handler
-  const handleMouseMove = (e, idx) => {
-    const rect = slideRefs[idx].current.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 30; // max 15px left/right
-    const y = ((e.clientY - rect.top) / rect.height - 0.5) * 30; // max 15px up/down
-    setParallax((prev) => ({ ...prev, [idx]: { x, y } }));
-  };
-  const handleMouseLeave = (idx) => {
-    setParallax((prev) => ({ ...prev, [idx]: { x: 0, y: 0 } }));
-  };
-
-  // Check if mobile on mount and resize
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
+  // Optimized parallax effect handler
+  const handleMouseMove = useCallback((e, idx) => {
+    if (isMobile) return;
     
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    const rect = slideRefs[idx].current?.getBoundingClientRect();
+    if (!rect) return;
+    
+    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 20; // Reduced movement for performance
+    const y = ((e.clientY - rect.top) / rect.height - 0.5) * 20;
+    setParallax((prev) => ({ ...prev, [idx]: { x, y } }));
+  }, [isMobile, slideRefs]);
+
+  const handleMouseLeave = useCallback((idx) => {
+    setParallax((prev) => ({ ...prev, [idx]: { x: 0, y: 0 } }));
   }, []);
 
-  // Auto-scroll for mobile
-  useEffect(() => {
-    if (!isMobile) return;
-    
-    const interval = setInterval(() => {
-      setSelectedSlide((prev) => (prev + 1) % slides.length);
-    }, 3000);
-    
-    return () => clearInterval(interval);
-  }, [isMobile, slides.length]);
-
-  const navigateToProductPage = () => {
+  // Optimized navigation
+  const navigateToProductPage = useCallback(() => {
     router.push("/product");
-  };
+  }, [router]);
+
+  // Early return for loading state
+  if (!isInitialized) {
+    return (
+      <div className="w-full h-[400px] flex items-center justify-center bg-gray-100">
+        <div className="animate-pulse text-gray-500">Loading carousel...</div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -127,56 +167,76 @@ export default function IntelCarousel() {
         zIndex: 1,
         marginLeft: isMobile ? "calc(-50vw + 50%)" : "0",
         marginRight: isMobile ? "calc(-50vw + 50%)" : "0",
-        minHeight: "400px", // Add minimum height to ensure visibility
+        minHeight: "400px",
       }}
       className={isMobile ? "" : "w-full"}
     >
       {slides && slides.length > 0 ? (
         slides.map((slide, idx) => {
           const isLoaded = loadedImages.has(slide);
+          const isSelected = selectedSlide === idx;
+          
           return (
             <div
               key={idx}
               ref={slideRefs[idx]}
-              onClick={() => !isMobile && setSelectedSlide(selectedSlide === idx ? null : idx)}
+              onClick={() => !isMobile && setSelectedSlide(isSelected ? null : idx)}
               onMouseMove={(e) => !isMobile && handleMouseMove(e, idx)}
               onMouseLeave={() => !isMobile && handleMouseLeave(idx)}
               style={{
                 ...(isMobile ? {
                   width: "100vw",
                   height: "100vh",
-                  display: selectedSlide === idx ? "block" : "none",
+                  display: isSelected ? "block" : "none",
                   position: "relative",
                   cursor: "default"
                 } : getSlideUniqueStyle(idx)),
                 cursor: isMobile ? "default" : "pointer",
+                willChange: isSelected ? 'transform' : 'auto', // Optimize for animations
               }}
               className={`front-page-slider relative ${isMobile ? "mobile-slide" : ""}`}
             >
               <div
-                className="background-image-center front-slide-hover"
+                className="background-image-center front-slide-hover relative overflow-hidden"
                 style={{
                   height: isMobile ? "100vh" : (
-                    selectedSlide === idx
+                    isSelected
                       ? "40rem"
                       : idx === 1
                       ? "clamp(20rem,70vh,35rem)"
                       : "clamp(20rem,70vh,40rem)"
                   ),
                   width: isMobile ? "100vw" : "auto",
-                  backgroundImage: `url(${slide})`,
-                  backgroundSize: isMobile ? "cover" : "cover",
-                  backgroundPosition: isMobile ? "center" : "center",
                   transition: "transform 0.2s cubic-bezier(.23,1.01,.32,1)",
                   transform: isMobile ? "none" : (parallax[idx]
                     ? `translate3d(${parallax[idx].x || 0}px, ${parallax[idx].y || 0}px, 0)`
                     : "none"),
-                  opacity: isLoaded ? 1 : 0.8,
                 }}
               >
-               
+                {/* Optimized Image with Next.js Image component */}
+                <div className="relative w-full h-full">
+                  <NextImage
+                    src={slide}
+                    alt={`Carousel slide ${idx + 1}`}
+                    fill
+                    className={`object-cover transition-opacity duration-300 ${
+                      isLoaded ? 'opacity-100' : 'opacity-0'
+                    }`}
+                    priority={idx === 0} // Only prioritize first image
+                    loading={idx === 0 ? 'eager' : 'lazy'}
+                    placeholder="blur"
+                    blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
+                  />
+                  
+                  {/* Loading placeholder */}
+                  {!isLoaded && (
+                    <div className="absolute inset-0 bg-gray-200 animate-pulse" />
+                  )}
+                </div>
               </div>
-              {!isMobile && selectedSlide !== idx && (
+              
+              {!isMobile && !isSelected && (
                 <div className="absolute w-full h-full top-0 left-0 slide-dark-cover"></div>
               )}
             </div>
@@ -204,6 +264,7 @@ export default function IntelCarousel() {
             onClick={() => setSelectedSlide((prev) => (prev - 1 + slides.length) % slides.length)}
             className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/40 text-white rounded-full w-10 h-10 flex items-center justify-center z-20 hover:bg-black/60 transition"
             style={{ outline: 'none', border: 'none' }}
+            aria-label="Previous slide"
           >
             ‹
           </button>
@@ -211,6 +272,7 @@ export default function IntelCarousel() {
             onClick={() => setSelectedSlide((prev) => (prev + 1) % slides.length)}
             className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/40 text-white rounded-full w-10 h-10 flex items-center justify-center z-20 hover:bg-black/60 transition"
             style={{ outline: 'none', border: 'none' }}
+            aria-label="Next slide"
           >
             ›
           </button>
@@ -225,6 +287,7 @@ export default function IntelCarousel() {
                   selectedSlide === idx ? 'bg-white' : 'bg-white/50'
                 }`}
                 style={{ outline: 'none', border: 'none' }}
+                aria-label={`Go to slide ${idx + 1}`}
               />
             ))}
           </div>

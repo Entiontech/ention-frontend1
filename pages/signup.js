@@ -7,9 +7,7 @@ import hero from 'public/assets/Group 2069.png'
 import hero1 from 'public/assets/Group 2070.png'
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'react-toastify';
-import {FcGoogle} from 'react-icons/fc';
 import {FiEye, FiEyeOff} from 'react-icons/fi';
-import { FaLinkedinIn } from 'react-icons/fa';
 import bg1 from 'public/assets/Group 2069.png';
 import bg2 from 'public/assets/Group 2070.png';
 import { signup } from '../utils/auth';
@@ -158,15 +156,7 @@ const Signup = () => {
                             </div>
                         </div>
                         <button type="submit" className='w-full h-12 text-white text-lg rounded-lg bg-[#007E9E] hover:bg-[#005f7a] font-semibold transition'>Sign Up</button>
-                        <div className='flex items-center gap-2 my-2'>
-                            <div className='flex-grow h-px bg-gray-300'></div>
-                            <span className='text-gray-400 text-sm'>or sign up with</span>
-                            <div className='flex-grow h-px bg-gray-300'></div>
-                        </div>
-                        <div className='flex gap-4 items-center justify-center'>
-                            <button type="button" className='flex items-center justify-center w-12 h-12 rounded-full border-2 border-gray-200 hover:border-[#007E9E] bg-white shadow-md transition text-2xl'><FcGoogle /></button>
-                            <button type="button" className='flex items-center justify-center w-12 h-12 rounded-full border-2 border-gray-200 hover:border-[#007E9E] bg-white shadow-md transition text-2xl text-[#0077B5]'><FaLinkedinIn /></button>
-                        </div>
+
                     </form>
                 </div>
             </div>

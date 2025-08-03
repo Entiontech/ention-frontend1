@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: false,
   
-  // Image optimization
+  // Aggressive image optimization
   images: {
     domains: [
       "picsum.photos",
@@ -17,17 +17,24 @@ const nextConfig = {
     minimumCacheTTL: 31536000, // 1 year
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    // Aggressive optimization
+    unoptimized: false,
+    loader: 'default',
+    quality: 85, // Slightly reduced for faster loading
   },
 
-  // Performance optimizations
+  // Enhanced performance optimizations
   experimental: {
     optimizePackageImports: ['react-icons', 'framer-motion', 'swiper'],
+    optimizeCss: true, // Enable CSS optimization
+    scrollRestoration: true, // Better scroll performance
+    legacyBrowsers: false, // Disable legacy browser support for better performance
   },
 
   // Compression
   compress: true,
 
-  // Caching headers
+  // Enhanced caching headers
   async headers() {
     return [
       {
@@ -45,6 +52,10 @@ const nextConfig = {
             key: 'X-XSS-Protection',
             value: '1; mode=block',
           },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
         ],
       },
       {
@@ -53,6 +64,10 @@ const nextConfig = {
           {
             key: 'Cache-Control',
             value: 'public, max-age=31536000, immutable',
+          },
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
           },
         ],
       },
@@ -65,10 +80,33 @@ const nextConfig = {
           },
         ],
       },
+      {
+        source: '/_next/image/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      // Video caching
+      {
+        source: '/(.*)\\.(mp4|webm|ogg)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+          {
+            key: 'Accept-Ranges',
+            value: 'bytes',
+          },
+        ],
+      },
     ];
   },
 
-  // Bundle analyzer (optional)
+  // Enhanced webpack configuration
   webpack: (config, { dev, isServer }) => {
     // Optimize bundle size
     if (!dev && !isServer) {
@@ -79,11 +117,59 @@ const nextConfig = {
             test: /[\\/]node_modules[\\/]/,
             name: 'vendors',
             chunks: 'all',
+            priority: 10,
+          },
+          common: {
+            name: 'common',
+            minChunks: 2,
+            chunks: 'all',
+            priority: 5,
           },
         },
       };
+
+      // Enable tree shaking
+      config.optimization.usedExports = true;
+      config.optimization.sideEffects = false;
     }
+
+    // Optimize for performance
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      net: false,
+      tls: false,
+    };
+
     return config;
+  },
+
+  // Enable SWC minification for faster builds
+  swcMinify: true,
+
+  // Optimize for production
+  productionBrowserSourceMaps: false,
+
+  // Enable static optimization
+  trailingSlash: false,
+  
+  // Optimize for faster loading
+  poweredByHeader: false,
+  
+  // Enable HTTP/2 Server Push
+  async rewrites() {
+    return [
+      {
+        source: '/assets/:path*',
+        destination: '/assets/:path*',
+        headers: [
+          {
+            key: 'Link',
+            value: '</assets/landing_page/2A.webp>; rel=preload; as=image, </assets/landing_page/3A.webp>; rel=preload; as=image, </assets/landing_page/4A.webp>; rel=preload; as=image',
+          },
+        ],
+      },
+    ];
   },
 };
 
