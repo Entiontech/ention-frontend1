@@ -9,18 +9,14 @@ import Header from "components/layout/header";
 import Footer from "components/layout/footer";
 
 // Patch to suppress deprecated DOMNodeInserted warning from react-simple-chatbot
-if (typeof window !== 'undefined' && window.MutationObserver) {
-  const origObserve = window.MutationObserver.prototype.observe;
-  window.MutationObserver.prototype.observe = function(target, options) {
-    if (options && options.subtree && options.childList && options.attributes) {
-      // Remove deprecated event listeners if present
-      if (target && target.removeEventListener) {
-        try {
-          target.removeEventListener('DOMNodeInserted', () => {});
-        } catch (e) {}
-      }
+if (typeof window !== 'undefined') {
+  // Suppress console warnings for deprecated events
+  const originalWarn = console.warn;
+  console.warn = function(...args) {
+    if (args[0] && typeof args[0] === 'string' && args[0].includes('DOMNodeInserted')) {
+      return; // Suppress DOMNodeInserted warnings
     }
-    return origObserve.apply(this, arguments);
+    originalWarn.apply(console, args);
   };
 }
 
