@@ -20,7 +20,7 @@ export default function handler(req, res) {
     </image:image>
   </url>
   
-  <!-- Product Pages -->
+  <!-- Products Page -->
   <url>
     <loc>${baseUrl}/ecommerce/product</loc>
     <lastmod>${currentDate}</lastmod>
@@ -28,73 +28,12 @@ export default function handler(req, res) {
     <priority>0.9</priority>
   </url>
   
-  <url>
-    <loc>${baseUrl}/ecommerce/product/e3</loc>
-    <lastmod>${currentDate}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  
-  <url>
-    <loc>${baseUrl}/ecommerce/product/e4</loc>
-    <lastmod>${currentDate}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  
-  <url>
-    <loc>${baseUrl}/ecommerce/product/e5</loc>
-    <lastmod>${currentDate}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  
-  <!-- About Page -->
+  <!-- About Us Page -->
   <url>
     <loc>${baseUrl}/about</loc>
     <lastmod>${currentDate}</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  
-  <!-- Contact Page -->
-  <url>
-    <loc>${baseUrl}/contact</loc>
-    <lastmod>${currentDate}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <!-- Support Page -->
-  <url>
-    <loc>${baseUrl}/technical-support</loc>
-    <lastmod>${currentDate}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <!-- Career Page -->
-  <url>
-    <loc>${baseUrl}/career</loc>
-    <lastmod>${currentDate}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <!-- Corporate Page -->
-  <url>
-    <loc>${baseUrl}/corporate</loc>
-    <lastmod>${currentDate}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <!-- Associate Page -->
-  <url>
-    <loc>${baseUrl}/associate</loc>
-    <lastmod>${currentDate}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
+    <priority>0.8</priority>
   </url>
   
   <!-- Collaborate Page -->
@@ -102,23 +41,7 @@ export default function handler(req, res) {
     <loc>${baseUrl}/collaborate</loc>
     <lastmod>${currentDate}</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <!-- Cart Page -->
-  <url>
-    <loc>${baseUrl}/ecommerce/cart</loc>
-    <lastmod>${currentDate}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.4</priority>
-  </url>
-  
-  <!-- Checkout Page -->
-  <url>
-    <loc>${baseUrl}/ecommerce/checkout</loc>
-    <lastmod>${currentDate}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.4</priority>
+    <priority>0.7</priority>
   </url>
   
 </urlset>`;
