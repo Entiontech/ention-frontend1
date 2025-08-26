@@ -456,7 +456,7 @@ export default function Home() {
         <div className="w-full">
                      {/* Mobile: Centered logo and heading */}
            <div className="flex flex-col items-center justify-center md:hidden px-4 pt-16 pb-12">
-             <Image src="/assets/ention-logo.png" alt="Ention Logo" width={80} height={80} className="mb-6" />
+             
              <h1 className="text-white text-2xl font-semibold leading-tight mb-3 text-center">
                Wherever you are, <span className="text-[#01E9FE] font-semibold">Ention</span> is within reach.
              </h1>
@@ -480,11 +480,9 @@ export default function Home() {
             </div>
           </div>
                      {/* Desktop: Logo at top center, content below */}
-           <div className="hidden md:flex flex-col justify-center items-center mt-32 mb-16 min-h-[70vh] px-8 lg:px-12">
+           <div className="hidden md:flex flex-col justify-center items-center mt-0 mb-16 min-h-[70vh] px-8 lg:px-12">
              {/* Logo at top center */}
-             <div className="flex justify-center items-center mb-12">
-               <Image src="/assets/ention-logo.png" alt="Ention Logo" width={120} height={120} />
-             </div>
+             
              {/* Main content block centered */}
              <div className="flex flex-col items-center w-full max-w-5xl">
                <h1 className="text-white text-3xl font-semibold leading-tight mb-4 text-center">

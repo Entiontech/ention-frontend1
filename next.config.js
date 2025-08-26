@@ -33,7 +33,7 @@ const nextConfig = {
   // Compression
   compress: true,
 
-  // Enhanced caching headers
+  // Enhanced caching headers with cache-busting for images
   async headers() {
     return [
       {
@@ -55,6 +55,10 @@ const nextConfig = {
             key: 'Referrer-Policy',
             value: 'strict-origin-when-cross-origin',
           },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=0, must-revalidate',
+          },
         ],
       },
       {
@@ -62,11 +66,15 @@ const nextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
+            value: 'public, max-age=86400, must-revalidate', // 24 hours cache
           },
           {
             key: 'Access-Control-Allow-Origin',
             value: '*',
+          },
+          {
+            key: 'ETag',
+            value: '"' + Date.now() + '"', // Cache-busting ETag
           },
         ],
       },
@@ -84,7 +92,11 @@ const nextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
+            value: 'public, max-age=86400, must-revalidate', // 24 hours for images
+          },
+          {
+            key: 'ETag',
+            value: '"' + Date.now() + '"', // Cache-busting ETag
           },
         ],
       },
@@ -99,6 +111,24 @@ const nextConfig = {
           {
             key: 'Accept-Ranges',
             value: 'bytes',
+          },
+        ],
+      },
+      // Specific headers for image files to prevent old cache
+      {
+        source: '/(.*)\\.(jpg|jpeg|png|gif|webp|avif|svg)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=86400, must-revalidate',
+          },
+          {
+            key: 'ETag',
+            value: '"' + Date.now() + '"',
+          },
+          {
+            key: 'Last-Modified',
+            value: new Date().toUTCString(),
           },
         ],
       },

@@ -10,6 +10,36 @@ export default function Document() {
         <link rel="shortcut icon" href="/bot.png" />
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"></link>
         
+        {/* Open Graph Meta Tags - Prevent old images from appearing */}
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="ENTION - Made in India Laptops" />
+        <meta property="og:description" content="ENTION - Premium Made in India Laptops. E3, E4, E5 Series with latest technology and affordable pricing." />
+        <meta property="og:url" content="https://ention.in" />
+        <meta property="og:site_name" content="ENTION" />
+        <meta property="og:image" content="https://ention.in/assets/ention-logo.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:type" content="image/png" />
+        <meta property="og:image:alt" content="ENTION - Made in India Laptops Logo" />
+        <meta property="og:locale" content="en_US" />
+        
+        {/* Twitter Card Meta Tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="ENTION - Made in India Laptops" />
+        <meta name="twitter:description" content="ENTION - Premium Made in India Laptops. E3, E4, E5 Series with latest technology and affordable pricing." />
+        <meta name="twitter:image" content="https://ention.in/assets/ention-logo.png" />
+        <meta name="twitter:image:alt" content="ENTION - Made in India Laptops Logo" />
+        
+        {/* Additional Meta Tags for Better SEO and Cache Control */}
+        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+        <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+        <meta name="bingbot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+        
+        {/* Cache Control Headers via Meta Tags */}
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+        <meta http-equiv="Pragma" content="no-cache" />
+        <meta http-equiv="Expires" content="0" />
+        
         {/* Preload critical resources */}
         <link rel="preload" href="/_next/static/chunks/main.js" as="script" />
         

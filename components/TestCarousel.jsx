@@ -29,12 +29,22 @@ export default function TestCarousel() {
       const imagesToPreload = imagesArray.slice(0, 3);
       const promises = imagesToPreload.map((src) => {
         return new Promise((resolve) => {
-          const img = new Image();
-          img.onload = () => {
-            setLoadedImages(prev => new Set([...prev, src]));
+          // Use a safer approach for image preloading
+          if (typeof window !== 'undefined') {
+            const img = new window.Image();
+            img.onload = () => {
+              setLoadedImages(prev => new Set([...prev, src]));
+              resolve();
+            };
+            img.onerror = () => {
+              // If image fails to load, still resolve to prevent blocking
+              resolve();
+            };
+            img.src = src;
+          } else {
+            // Server-side rendering fallback
             resolve();
-          };
-          img.src = src;
+          }
         });
       });
       await Promise.all(promises);
